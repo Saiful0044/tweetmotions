@@ -1,6 +1,9 @@
 # local package
 -e .
-
+numpy
+pandas 
+scikit-learn
+ymal
 # external requirements
 click
 Sphinx
