@@ -1,0 +1,22 @@
+artifact_path: file:///E:/ML%20Projects/tweetmotions/mlruns/334875275788873877/models/m-a6af8643621d4c26bf862e5ed95bbbc2/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.10.11
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.0
+mlflow_version: 3.1.1
+model_id: m-a6af8643621d4c26bf862e5ed95bbbc2
+model_size_bytes: 16717
+model_uuid: m-a6af8643621d4c26bf862e5ed95bbbc2
+prompts: null
+run_id: 16edfba198824dbdae2224f56562cc1b
+utc_time_created: '2025-07-01 12:29:04.785730'

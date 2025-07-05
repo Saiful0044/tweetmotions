@@ -1,0 +1,10 @@
+artifact_location: file:///E:/ML%20Projects/tweetmotions/mlruns/334875275788873877/models/m-ce7800b1dc564e6a934809ee7a73eb33/artifacts
+creation_timestamp: 1751362967078
+experiment_id: '334875275788873877'
+last_updated_timestamp: 1751362992285
+model_id: m-ce7800b1dc564e6a934809ee7a73eb33
+model_type: null
+name: model
+source_run_id: 784cdb33bd024698bb955cd23936fce6
+status: 2
+status_message: null

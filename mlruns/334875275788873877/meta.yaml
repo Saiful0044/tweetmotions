@@ -1,0 +1,6 @@
+artifact_location: file:///E:/ML%20Projects/tweetmotions/mlruns/334875275788873877
+creation_time: 1751349628652
+experiment_id: '334875275788873877'
+last_update_time: 1751349628652
+lifecycle_stage: active
+name: dvc-pipeline
