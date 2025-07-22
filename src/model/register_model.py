@@ -5,7 +5,24 @@ import logging
 import mlflow
 import mlflow.sklearn
 from mlflow.tracking import MlflowClient
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+# Set up DagsHub credentials for MLflow tracking
+dagshub_token = os.getenv("DAGSHUB_PAT")
+if not dagshub_token:
+    raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
+
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+dagshub_url = "https://dagshub.com"
+repo_owner = "Saiful0044"
+repo_name = "tweetmotions"
+
+# Set up MLflow tracking URI
+mlflow.set_tracking_uri(f"{dagshub_url}/{repo_owner}/{repo_name}.mlflow")
 # -------------------- Logging Configuration --------------------
 logger = logging.getLogger("model registry")
 logger.setLevel(logging.DEBUG)
@@ -46,7 +63,7 @@ def load_model_info(file_path: str) -> dict:
 def register_model(model_name: str):
     """Register the latest valid MLflow model to the Model Registry."""
     try:
-        mlflow.set_tracking_uri("http://127.0.0.1:5000")
+        # mlflow.set_tracking_uri("http://127.0.0.1:5000")
         client = MlflowClient()
         experiment = client.get_experiment_by_name("dvc-pipeline")
 

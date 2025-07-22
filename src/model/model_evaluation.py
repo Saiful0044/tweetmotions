@@ -9,7 +9,24 @@ import mlflow.sklearn
 import os
 from pathlib import Path
 from mlflow.models.signature import infer_signature
+from dotenv import load_dotenv
 
+load_dotenv()
+# Set credentials
+# Set up DagsHub credentials for MLflow tracking
+dagshub_token = os.getenv("DAGSHUB_PAT")
+if not dagshub_token:
+    raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
+
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+dagshub_url = "https://dagshub.com"
+repo_owner = "Saiful0044"
+repo_name = "tweetmotions"
+
+# Set up MLflow tracking URI
+mlflow.set_tracking_uri(f"{dagshub_url}/{repo_owner}/{repo_name}.mlflow")
 
 # logging configuration
 logger = logging.getLogger("model_evaluation")
@@ -51,7 +68,7 @@ def data_load(data_path: str) -> pd.DataFrame:
 
 def load_model(model_path: str):
     try:
-        with open(model_path, 'rb') as f:
+        with open(model_path, "rb") as f:
             model = pickle.load(f)
         logger.info(f"Model loaded successfully from {model_path}")
         return model
@@ -60,7 +77,9 @@ def load_model(model_path: str):
         raise
 
     except Exception as e:
-        logger.exception(f"Error occurred while loading the model from {model_path}: {e}")
+        logger.exception(
+            f"Error occurred while loading the model from {model_path}: {e}"
+        )
         raise
 
 
@@ -76,10 +95,10 @@ def evaluation_model(model, X_test: np.ndarray, y_test: np.ndarray) -> dict:
         auc = roc_auc_score(y_test, y_pred_proba)
 
         metrics_dict = {
-            'accuracy': accuracy,
-            'precision': precision,
-            'recall': recall,
-            'auc': auc
+            "accuracy": accuracy,
+            "precision": precision,
+            "recall": recall,
+            "auc": auc,
         }
 
         logger.debug("Model evaluation metrics calculated")
@@ -103,28 +122,24 @@ def save_metrics(metrics: dict, file_path: str) -> None:
 def save_model_info(run_id: str, model_path: str, file_path: str) -> None:
     """Save the model run ID and path to a JSON file."""
     try:
-        model_info = {
-            'run_id': run_id,
-            'model_path': model_path
-        }
-        with open(file_path, 'w') as f:
+        model_info = {"run_id": run_id, "model_path": model_path}
+        with open(file_path, "w") as f:
             json.dump(model_info, f, indent=4)
         logger.debug(f"Model info saved to {file_path}")
-        
+
     except Exception as e:
         logger.error(f"Error occurred while saving the model info: {e}")
         raise
 
 
 def main():
-    mlflow.set_tracking_uri("file:///home/runner/work/tweetmotions/tweetmotions/mlruns")  # adjust path as needed
     mlflow.set_experiment("dvc-pipeline")
 
     with mlflow.start_run() as run:
         try:
             root_path = Path(__file__).parent.parent.parent
-            model = load_model(root_path / 'models' / 'model.pkl')
-            test_data = data_load(root_path / 'data' / 'processed' / 'test_bow.csv')
+            model = load_model(root_path / "models" / "model.pkl")
+            test_data = data_load(root_path / "data" / "processed" / "test_bow.csv")
 
             X_test = test_data.iloc[:, :-1]
             y_test = test_data.iloc[:, -1]
@@ -136,25 +151,17 @@ def main():
                 mlflow.log_metric(metric_name, metric_value)
 
             # Log model parameters to MLflow
-            if hasattr(model, 'get_params'):
+            if hasattr(model, "get_params"):
                 params = model.get_params()
                 for param_name, param_value in params.items():
                     mlflow.log_param(param_name, param_value)
 
-            save_metrics(metrics, 'reports/metrics.json')
+            save_metrics(metrics, "reports/metrics.json")
             # save model info
-            save_model_info(run.info.run_id, 'model', 'reports/experiment_info.json')
+            save_model_info(run.info.run_id, "model", "reports/experiment_info.json")
 
-            # infer model signature
-            signature = infer_signature(X_test, model.predict(X_test))
-            # log model to mlflow
-            mlflow.sklearn.log_model(
-                sk_model=model,
-                artifact_path='model',
-                input_example=X_test.head(5),
-                signature=signature,
-                registered_model_name="MyRegisterModel"
-            )
+            # Log model to MLflow
+            mlflow.sklearn.log_model(model, "model")
 
             # Log the metrics file to MLflow
             mlflow.log_artifact("reports/metrics.json")
@@ -170,5 +177,5 @@ def main():
             raise
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
