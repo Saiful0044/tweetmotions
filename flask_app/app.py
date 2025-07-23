@@ -3,12 +3,49 @@ import preprocessing_utility as ppu
 import mlflow.pyfunc
 import pickle
 import pandas as pd
+from dotenv import load_dotenv
+import os
+import mlflow
 
-model = mlflow.pyfunc.load_model("models:/MyRegisterModel@production")
-vectorizer = pickle.load(open("models/vectorizer.pkl", "rb"))
+# model = mlflow.pyfunc.load_model("models:/MyRegisterModel@production")
+# vectorizer = pickle.load(open("models/vectorizer.pkl", "rb"))
+
+
+# Set up DagsHub credentials for MLflow tracking
+load_dotenv()
+dagshub_token = os.getenv("DAGSHUB_PAT")
+if not dagshub_token:
+    raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
+
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+dagshub_url = "https://dagshub.com"
+repo_owner = "Saiful0044"
+repo_name = "tweetmotions"
+# Set up MLflow tracking URI
+mlflow.set_tracking_uri(f"{dagshub_url}/{repo_owner}/{repo_name}.mlflow")
+
 
 app = Flask(__name__)
 
+
+# load model from model registry
+def get_latest_model_version(model_name):
+    client = mlflow.MlflowClient()
+    latest_version = client.get_latest_versions(model_name, stages=["Staging"])
+    if not latest_version:
+        latest_version = client.get_latest_versions(model_name, stages=["None"])
+    return latest_version[0].version if latest_version else None
+
+
+model_name = "MyRegisterModel"
+model_version = get_latest_model_version(model_name)
+
+model_uri = f"models:/{model_name}/{model_version}"
+model = mlflow.pyfunc.load_model(model_uri)
+
+vectorizer = pickle.load(open("models/vectorizer.pkl", "rb"))
 
 @app.route("/")
 def home():
