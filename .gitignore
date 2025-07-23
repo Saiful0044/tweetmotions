@@ -87,3 +87,7 @@ target/
 
 # Mypy cache
 .mypy_cache/
+
+
+# exclude data from source control by default
+/data/

@@ -60,34 +60,25 @@ def load_model_info(file_path: str) -> dict:
 
 
 # -------------------- Register Model --------------------
-def register_model(model_name: str):
-    """Register the latest valid MLflow model to the Model Registry."""
+def register_model(model_name: str, model_info: dict):
+    """Register the model to the MLflow Model Registry."""
     try:
-        # mlflow.set_tracking_uri("http://127.0.0.1:5000")
-        client = MlflowClient()
-        experiment = client.get_experiment_by_name("dvc-pipeline")
+        model_uri = f"runs:/{model_info['run_id']}/{model_info['model_path']}"
 
-        # Get latest run
-        runs = client.search_runs(experiment_ids=[experiment.experiment_id],
-                                order_by= ["start_time DESC"],
-                                max_results=1)
-        run_id = runs[0].info.run_id
-        logger.info(f"Latest run id is found: {run_id}")
-        model_version = mlflow.register_model(
-            model_uri=f"runs:/{run_id}/model", name=model_name
+        # Register the model
+        model_version = mlflow.register_model(model_uri, model_name)
+
+        # Transition the model to "Staging" stage
+        client = mlflow.tracking.MlflowClient()
+        client.transition_model_version_stage(
+            name=model_name, version=model_version.version, stage="Staging"
         )
 
-        client.set_registered_model_alias(
-            name=model_name,
-            version=model_version.version,
-            alias="production",
-            
-        )
-        logger.info(
-            f"Model {model_name} version {model_version.version} transitioned to 'Production'"
+        logger.debug(
+            f"Model {model_name} version {model_version.version} registered and transitioned to Staging."
         )
     except Exception as e:
-        logger.error(f"Error during model registration: {str(e)}")
+        logger.error("Error during model registration: %s", e)
         raise
 
 
@@ -98,7 +89,7 @@ def main():
         model_info = load_model_info(model_info_path)
 
         model_name = "MyRegisterModel"
-        register_model(model_name=model_name)
+        register_model(model_name=model_name, model_info=model_info)
 
     except Exception as e:
         logger.error(f"Failed to complete the model registration process: {str(e)}")
