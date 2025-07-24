@@ -23,6 +23,7 @@ repo_name = "tweetmotions"
 
 # Set up MLflow tracking URI
 mlflow.set_tracking_uri(f"{dagshub_url}/{repo_owner}/{repo_name}.mlflow")
+
 # -------------------- Logging Configuration --------------------
 logger = logging.getLogger("model registry")
 logger.setLevel(logging.DEBUG)
