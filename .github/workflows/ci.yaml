@@ -21,5 +21,3 @@ jobs:
       - name: run pipeline 
         run: |
           dvc repro
-        env:
-          MLFLOW_TRACKING_URI: file://${{ github.workspace }}/mlruns
