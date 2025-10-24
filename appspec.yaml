@@ -1,8 +1,10 @@
 version: 0.0
 os: linux
+
 files:
-  - source: app/
+  - source: /
     destination: /home/ubuntu/app
+
 hooks:
   BeforeInstall:
     - location: deploy/scripts/install_dependencies.sh
@@ -13,5 +15,6 @@ hooks:
     - location: deploy/scripts/start_docker.sh
       timeout: 300
       runas: ubuntu
+
 
 
