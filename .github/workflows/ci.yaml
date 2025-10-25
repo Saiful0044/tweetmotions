@@ -89,7 +89,7 @@ jobs:
           aws deploy create-deployment \
             --application-name MyDockerApp \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --deployment-group-name MyDeploymentASGCodeDeploy \
+            --deployment-group-name MyDeploymentGroupBlueGreen \
             --s3-location bucket=saifulcodedeploybucket,key=deployment.zip,bundleType=zip \
             --file-exists-behavior OVERWRITE \
             --region eu-north-1
